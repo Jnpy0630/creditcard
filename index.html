@@ -3,35 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>許願信用卡</title>
+    <title>尊爵黑色許願卡</title>
     <script src="https://jsdelivr.net"></script>
     <style>
-        body { font-family: sans-serif; background: #fff1f2; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: #1a1a1a; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        
+        /* 黑色金屬質感卡片 */
         .card { 
-            background: linear-gradient(135deg, #fda4af 0%, #fb7185 100%);
-            width: 350px; height: 210px; border-radius: 20px; padding: 25px;
-            color: white; box-shadow: 0 20px 40px rgba(251, 113, 133, 0.4);
+            background: linear-gradient(135deg, #2c2c2c 0%, #000000 100%);
+            width: 350px; height: 210px; border-radius: 15px; padding: 25px;
+            color: #d4af37; /* 金色文字 */
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 10px rgba(212, 175, 55, 0.1);
             position: relative; box-sizing: border-box;
+            border: 1px solid rgba(212, 175, 55, 0.3);
         }
-        .chip { width: 50px; height: 38px; background: linear-gradient(135deg, #fbbf24 0%, #d97706 100%); border-radius: 8px; margin-bottom: 30px; }
-        .label { font-size: 14px; opacity: 0.9; text-transform: uppercase; letter-spacing: 1px; }
-        .points { font-size: 48px; font-weight: bold; margin: 10px 0; font-family: monospace; }
-        .holder { margin-top: 20px; font-size: 18px; letter-spacing: 2px; }
+
+        /* 金色晶片 */
+        .chip { 
+            width: 50px; height: 38px; 
+            background: linear-gradient(135deg, #d4af37 0%, #f9f0b1 50%, #aa8912 100%); 
+            border-radius: 6px; margin-bottom: 25px;
+            position: relative;
+        }
+        .chip::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; }
+
+        .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
+        .points { font-size: 52px; font-weight: bold; font-family: 'Courier New', monospace; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        
+        /* 持卡人姓名位置 */
+        .holder { position: absolute; bottom: 25px; left: 25px; font-size: 18px; letter-spacing: 2px; font-weight: 500; }
+
+        /* 黑色質感的扣點按鈕 */
         button { 
-            margin-top: 50px; padding: 15px 40px; border-radius: 50px; border: none;
-            background: #e11d48; color: white; font-size: 20px; font-weight: bold;
-            cursor: pointer; box-shadow: 0 10px 20px rgba(225, 29, 72, 0.3);
+            margin-top: 50px; padding: 15px 40px; border-radius: 5px; border: 1px solid #d4af37;
+            background: transparent; color: #d4af37; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s;
         }
+        button:hover { background: #d4af37; color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
     </style>
 </head>
 <body>
     <div class="card">
         <div class="chip"></div>
-        <div class="label">Wish Points 許願點數</div>
+        <div class="label">WISH POINTS 許願點數</div>
         <div class="points" id="balance">--</div>
-        <div class="holder">HOLDER: <span id="user">TEST USER</span></div>
+        <div class="holder">HOLDER: <span id="user">陳鳳麟</span></div>
     </div>
-    <button onclick="deduct()">✨ 扣除 1 點許願 ✨</button>
+    <button onclick="deduct()">執行許願 (扣除 1 點)</button>
 
     <script>
         const SUPABASE_URL = 'https://supabase.co';
@@ -39,29 +57,25 @@
         const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         async function load() {
-            try {
-                const { data, error } = await supabase.from('users_points').select('*').eq('username', 'test').single();
-                if (data) {
-                    document.getElementById('balance').innerText = data.balance.toString().padStart(2, '0');
-                    document.getElementById('user').innerText = data.username.toUpperCase();
-                } else {
-                    document.getElementById('balance').innerText = "ERR";
-                    console.error("找不到資料", error);
-                }
-            } catch (e) { console.error("連線錯誤", e); }
+            const { data, error } = await supabase.from('users_points').select('*').eq('username', 'test').single();
+            if (data) {
+                document.getElementById('balance').innerText = data.balance.toString().padStart(2, '0');
+            } else {
+                document.getElementById('balance').innerText = "??";
+            }
         }
 
         async function deduct() {
             let current = parseInt(document.getElementById('balance').innerText);
-            if (isNaN(current) || current <= 0) return alert("點數沒囉！");
+            if (isNaN(current) || current <= 0) return alert("點數已用盡");
 
             const { error } = await supabase.from('users_points').update({ balance: current - 1 }).eq('username', 'test');
 
             if (!error) {
-                alert("許願成功！");
+                alert("許願成功，點數已扣除");
                 load();
             } else {
-                alert("扣點失敗，請檢查 Supabase RLS 是否關閉");
+                alert("連線失敗，請檢查 Supabase RLS 設定");
             }
         }
         load();
