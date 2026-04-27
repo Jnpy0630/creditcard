@@ -69,7 +69,7 @@
             let current = parseInt(document.getElementById('balance').innerText);
             if (isNaN(current) || current <= 0) return alert("點數已用盡");
 
-            const { error } = await supabase.from('users_points').update({ balance: current - 1 }).eq('username', 'test');
+            const { error } = await supabase.from('users_points').update({ balance: current - 1 }).eq('username', '陳鳳麟');
 
             if (!error) {
                 alert("許願成功，點數已扣除");
