@@ -51,34 +51,48 @@
     </div>
     <button onclick="deduct()">執行許願 (扣除 1 點)</button>
 
-    <script>
-        const SUPABASE_URL = 'https://supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_0ls2zg8ytXqYtJ2sutWfXQ_JWvb8lU-';
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+   <script>
+    const SUPABASE_URL = 'https://supabase.co';
+    const SUPABASE_KEY = 'sb_publishable_0ls2zg8ytXqYtJ2sutWfXQ_JWvb8lU-';
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        async function load() {
-            const { data, error } = await supabase.from('users_points').select('*').eq('username', 'test').single();
-            if (data) {
-                document.getElementById('balance').innerText = data.balance.toString().padStart(2, '0');
-            } else {
-                document.getElementById('balance').innerText = "??";
-            }
+    async function load() {
+        // 這裡改為搜尋「陳鳳麟」
+        const { data, error } = await supabase
+            .from('users_points')
+            .select('balance')
+            .eq('username', '陳鳳麟') 
+            .maybeSingle();
+
+        if (error) {
+            console.error(error);
+            document.getElementById('balance').innerText = "!!";
+        } else if (data) {
+            document.getElementById('balance').innerText = data.balance.toString().padStart(2, '0');
+        } else {
+            document.getElementById('balance').innerText = "??";
+            console.log("找不到陳鳳麟的資料");
         }
+    }
 
-        async function deduct() {
-            let current = parseInt(document.getElementById('balance').innerText);
-            if (isNaN(current) || current <= 0) return alert("點數已用盡");
+    async function deduct() {
+        let current = parseInt(document.getElementById('balance').innerText);
+        if (isNaN(current) || current <= 0) return alert("點數不足");
 
-            const { error } = await supabase.from('users_points').update({ balance: current - 1 }).eq('username', '陳鳳麟');
+        // 這裡也要同步改為更新「陳鳳麟」的點數
+        const { error } = await supabase
+            .from('users_points')
+            .update({ balance: current - 1 })
+            .eq('username', '陳鳳麟');
 
-            if (!error) {
-                alert("許願成功，點數已扣除，請你多愛我一點");
-                load();
-            } else {
-                alert("連線失敗，請檢查 Supabase RLS 設定");
-            }
+        if (!error) {
+            alert("許願成功！");
+            load();
+        } else {
+            alert("更新失敗: " + error.message);
         }
-        load();
-    </script>
+    }
+    load();
+</script>
 </body>
 </html>
