@@ -72,7 +72,7 @@
             const { error } = await supabase.from('users_points').update({ balance: current - 1 }).eq('username', '陳鳳麟');
 
             if (!error) {
-                alert("許願成功，點數已扣除");
+                alert("許願成功，點數已扣除，請你多愛我一點");
                 load();
             } else {
                 alert("連線失敗，請檢查 Supabase RLS 設定");
