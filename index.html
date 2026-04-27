@@ -3,96 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>尊爵黑色許願卡</title>
+    <title>陳鳳麟的專屬信用卡</title>
+    <!-- 引入 Supabase JS SDK -->
     <script src="https://jsdelivr.net"></script>
     <style>
-        body { font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; background: #1a1a1a; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        body { 
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif; 
+            background: #0f0f0f; 
+            display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; 
+            height: 100vh; margin: 0; 
+        }
         
-        /* 黑色金屬質感卡片 */
+        /* 尊爵黑金信用卡 */
         .card { 
-            background: linear-gradient(135deg, #2c2c2c 0%, #000000 100%);
-            width: 350px; height: 210px; border-radius: 15px; padding: 25px;
+            background: linear-gradient(135deg, #333333 0%, #000000 100%);
+            width: 350px; height: 210px; border-radius: 18px; padding: 25px;
             color: #d4af37; /* 金色文字 */
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5), inset 0 0 10px rgba(212, 175, 55, 0.1);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.8), inset 0 0 15px rgba(212, 175, 55, 0.1);
             position: relative; box-sizing: border-box;
-            border: 1px solid rgba(212, 175, 55, 0.3);
+            border: 1px solid rgba(212, 175, 55, 0.4);
         }
 
-        /* 金色晶片 */
+        /* 擬真金色晶片 */
         .chip { 
-            width: 50px; height: 38px; 
+            width: 52px; height: 40px; 
             background: linear-gradient(135deg, #d4af37 0%, #f9f0b1 50%, #aa8912 100%); 
             border-radius: 6px; margin-bottom: 25px;
-            position: relative;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.3);
         }
-        .chip::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; border: 1px solid rgba(0,0,0,0.2); border-radius: 6px; }
 
-        .label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
-        .points { font-size: 52px; font-weight: bold; font-family: 'Courier New', monospace; color: #fff; text-shadow: 0 0 10px rgba(255,255,255,0.2); }
+        .label { font-size: 12px; color: #a1a1a1; text-transform: uppercase; letter-spacing: 2px; }
+        .points { 
+            font-size: 56px; font-weight: bold; font-family: 'Courier New', monospace; 
+            color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.4); 
+            margin: 5px 0;
+        }
         
-        /* 持卡人姓名位置 */
-        .holder { position: absolute; bottom: 25px; left: 25px; font-size: 18px; letter-spacing: 2px; font-weight: 500; }
+        .holder { position: absolute; bottom: 25px; left: 25px; font-size: 20px; letter-spacing: 3px; font-weight: bold; }
 
-        /* 黑色質感的扣點按鈕 */
+        /* 金屬質感按鈕 */
         button { 
-            margin-top: 50px; padding: 15px 40px; border-radius: 5px; border: 1px solid #d4af37;
-            background: transparent; color: #d4af37; font-size: 18px; font-weight: bold;
-            cursor: pointer; transition: all 0.3s;
+            margin-top: 60px; padding: 16px 45px; border-radius: 8px; 
+            border: 1px solid #d4af37; background: transparent; 
+            color: #d4af37; font-size: 18px; font-weight: bold;
+            cursor: pointer; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-transform: uppercase; letter-spacing: 1px;
         }
-        button:hover { background: #d4af37; color: #000; box-shadow: 0 0 20px rgba(212, 175, 55, 0.4); }
+        button:hover { 
+            background: #d4af37; color: #000; 
+            box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+            transform: translateY(-3px);
+        }
+        button:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
+
     <div class="card">
         <div class="chip"></div>
         <div class="label">WISH POINTS 許願點數</div>
         <div class="points" id="balance">--</div>
-        <div class="holder">HOLDER: <span id="user">陳鳳麟</span></div>
+        <div class="holder">HOLDER: <span>陳鳳麟</span></div>
     </div>
-    <button onclick="deduct()">執行許願 (扣除 1 點)</button>
+    
+    <button onclick="deduct()">✨ 執行許願 (扣除 1 點) ✨</button>
 
-   <script>
-    const SUPABASE_URL = 'https://supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_0ls2zg8ytXqYtJ2sutWfXQ_JWvb8lU-';
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    <script>
+        // 設定你的 Supabase 連線資訊 (已根據你的專案填入)
+        const SUPABASE_URL = 'https://supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_0ls2zg8ytXqYtJ2sutWfXQ_JWvb8lU-';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    async function load() {
-        // 這裡改為搜尋「陳鳳麟」
-        const { data, error } = await supabase
-            .from('users_points')
-            .select('balance')
-            .eq('username', '陳鳳麟') 
-            .maybeSingle();
+        // 初始化讀取點數
+        async function load() {
+            const { data, error } = await supabase
+                .from('users_points')
+                .select('balance')
+                .eq('username', '陳鳳麟')
+                .maybeSingle();
 
-        if (error) {
-            console.error(error);
-            document.getElementById('balance').innerText = "!!";
-        } else if (data) {
-            document.getElementById('balance').innerText = data.balance.toString().padStart(2, '0');
-        } else {
-            document.getElementById('balance').innerText = "??";
-            console.log("找不到陳鳳麟的資料");
+            if (error) {
+                console.error("連線錯誤:", error.message);
+                document.getElementById('balance').innerText = "!!";
+            } else if (data) {
+                // 成功顯示點數，並自動補零 (例如 09)
+                document.getElementById('balance').innerText = data.balance.toString().padStart(2, '0');
+            } else {
+                // 找不到資料時顯示 ??
+                document.getElementById('balance').innerText = "??";
+                console.log("資料庫中找不到名為 '陳鳳麟' 的資料，請確認 Supabase Table 內容。");
+            }
         }
-    }
 
-    async function deduct() {
-        let current = parseInt(document.getElementById('balance').innerText);
-        if (isNaN(current) || current <= 0) return alert("點數不足");
+        // 執行扣點動作
+        async function deduct() {
+            let currentStr = document.getElementById('balance').innerText;
+            let current = parseInt(currentStr);
+            
+            if (isNaN(current) || current <= 0) return alert("點數已用完囉！");
 
-        // 這裡也要同步改為更新「陳鳳麟」的點數
-        const { error } = await supabase
-            .from('users_points')
-            .update({ balance: current - 1 })
-            .eq('username', '陳鳳麟');
+            const { error } = await supabase
+                .from('users_points')
+                .update({ balance: current - 1 })
+                .eq('username', '陳鳳麟');
 
-        if (!error) {
-            alert("許願成功！");
-            load();
-        } else {
-            alert("更新失敗: " + error.message);
+            if (!error) {
+                alert("許願成功！");
+                load(); // 更新網頁上的數字
+            } else {
+                alert("更新失敗：" + error.message + "\n請檢查 Supabase 的 RLS 是否已關閉。");
+                console.error(error);
+            }
         }
-    }
-    load();
-</script>
+
+        // 網頁開啟後立刻執行 load
+        load();
+    </script>
 </body>
 </html>
