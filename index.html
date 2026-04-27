@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>許願信用卡</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: sans-serif; background: #fff1f2; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { 
+            background: linear-gradient(135deg, #fda4af 0%, #fb7185 100%);
+            width: 300px; height: 180px; border-radius: 15px; padding: 20px;
+            color: white; box-shadow: 0 10px 25px rgba(251, 113, 133, 0.4);
+            position: relative;
+        }
+        .chip { width: 40px; height: 30px; background: #fbbf24; border-radius: 5px; margin-bottom: 20px; }
+        .points { font-size: 32px; font-weight: bold; }
+        button { 
+            position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%);
+            padding: 12px 30px; border-radius: 25px; border: none;
+            background: #e11d48; color: white; font-size: 16px; font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div style="position: relative;">
+        <div class="card">
+            <div class="chip"></div>
+            <div style="font-size: 12px; opacity: 0.8;">剩餘許願點數</div>
+            <div class="points" id="balance">--</div>
+            <div style="margin-top: 20px;">HOLDER: <span id="user">TEST</span></div>
+        </div>
+        <button onclick="deduct()">✨ 點我扣點 ✨</button>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://supabase.co';
+        const SUPABASE_KEY = 'sb_publishable_0ls2zg8ytXqYtJ2sutWfXQ_JWvb8lU-';
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        async function load() {
+            const { data } = await supabase.from('users_points').select('*').eq('username', 'test').single();
+            if (data) { document.getElementById('balance').innerText = data.balance; }
+        }
+
+        async function deduct() {
+            let current = parseInt(document.getElementById('balance').innerText);
+            if (current <= 0) return alert("點數沒了！");
+            const { error } = await supabase.from('users_points').update({ balance: current - 1 }).eq('username', 'test');
+            if (!error) { alert("扣除成功！"); load(); }
+            else { alert("失敗，請檢查 Supabase RLS 設定"); }
+        }
+        load();
+    </script>
+</body>
+</html>
